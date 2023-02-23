@@ -16,7 +16,7 @@
 - Install dependencies, run
     > `pip install -r requirements.txt`
 - Get secret key using python shell
-    > `python -c 'import secrets; print(secrets.token_urlsafe())` 
+    > `python -c 'import secrets; print(secrets.token_urlsafe())'` 
 - Assign this key to DJANGO_SECRET_KEY in .django_env file.
 ---
 ### Database Setup
