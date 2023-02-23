@@ -1,0 +1,4 @@
+# To use this file, remove .sample extension and place it in project root folder
+# environment for postgres db running in docker
+POSTGRES_USER='postgres'
+POSTGRES_PASSWORD='postgres'

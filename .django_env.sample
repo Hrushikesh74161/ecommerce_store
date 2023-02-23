@@ -1,0 +1,11 @@
+# To use this file, remove .sample extension and place it in project root folder
+# environment variables for project
+DJANGO_SECRET_KEY=''
+DATABASE_NAME='postgres'
+DATABASE_USER='postgres'
+DATABASE_PASSWORD='postgres'
+DATABASE_HOST='localhost'
+DATABASE_PORT='5432'
+STRIPE_PUBLISHABLE_KEY=''
+STRIPE_SECRET_KEY=''
+STRIPE_WEBHOOK_ENDPOINT_SECRET=''

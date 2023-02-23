@@ -1,0 +1,15 @@
+Django
+
+django-environ - For plugging environment variables
+
+django-mptt - For storing hierarchial data
+
+django_debug_toolbar - For debug tool bar
+
+Pillow - Image library for storing images
+
+psycopyg2-binary - For postgres database
+
+six - for python2 to python3 help
+
+stripe - for stripe payment
