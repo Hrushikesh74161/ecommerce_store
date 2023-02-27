@@ -27,8 +27,8 @@ PROJECT_APPS = [
 ]
 
 THIRDPARTY_APPS = [
-    'mptt',
-    'debug_toolbar',
+    "mptt",
+    "debug_toolbar",
 ]
 
 DJANGO_APPS = [
@@ -136,7 +136,7 @@ LOGIN_URL = "/account/login/"
 
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 
-BASKET_SESSION_ID = 'basket'
+BASKET_SESSION_ID = "basket"
 
 # stripe payment
 STRIPE_SECRET_KEY = env("STRIPE_SECRET_KEY")

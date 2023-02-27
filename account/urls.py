@@ -21,9 +21,6 @@ urlpatterns = [
         name="logout",
     ),
     path("register/", views.AccountRegistration.as_view(), name="register"),
-    # path(
-    #     "acitvate/<slug:uidb64>/<slug:token>/", views.account_activate, name="activate"
-    # ),
     path(
         "acitvate/<slug:uidb64>/<slug:token>/",
         views.AccountActivate.as_view(),

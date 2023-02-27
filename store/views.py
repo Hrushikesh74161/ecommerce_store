@@ -2,22 +2,23 @@ from functools import lru_cache
 
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, DetailView
+from django.contrib import messages
 
 from store.models import Category, Product
 
 
 class AllProducts(ListView):
-    context_object_name = 'products'
-    template_name = 'store/index.html'
+    context_object_name = "products"
+    template_name = "store/index.html"
 
     def get_queryset(self):
-        return Product.objects.prefetch_related('product_images').filter(is_active=True)
-    
+        return Product.objects.prefetch_related("product_images").filter(is_active=True)
+
 
 class ProductDetail(DetailView):
-    context_object_name = 'product'
+    context_object_name = "product"
     model = Product
-    template_name = 'store/single.html'
+    template_name = "store/single.html"
 
     def get_object(self):
         slug = self.kwargs.get(self.slug_url_kwarg)
@@ -25,19 +26,22 @@ class ProductDetail(DetailView):
 
 
 class CategoryList(ListView):
-    template_name = 'store/category.html'
+    template_name = "store/category.html"
+    context_object_name = "products"
 
-    @lru_cache
-    def get_category(self):
-        return get_object_or_404(Category, slug=self.kwargs.get('category_slug')).get_descendants(include_self=True)
-    
+    def get(self, request, *args, **kwargs):
+        self.category = get_object_or_404(
+            Category, slug=self.kwargs.get("category_slug")
+        ).get_descendants(include_self=True)
+        return super().get(request, *args, **kwargs)
+
     def get_queryset(self):
-        products = Product.objects.prefetch_related('product_images').filter(
-        category__in=self.get_category())
+        products = Product.objects.prefetch_related("product_images").filter(
+            category__in=self.category
+        )
         return products
 
-    def get_context_data(self):
-        category = self.get_category()
-        products = self.get_queryset()
-        return {'category': category, 'products': products}
-    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context.update({"category": self.category})
+        return context

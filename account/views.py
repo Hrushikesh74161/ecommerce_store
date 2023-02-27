@@ -64,31 +64,31 @@ class AccountRegistration(FormView):
 
 
 class AccountActivate(TemplateView):
-    template_name = 'account/registration/acitvatin_invalid.html'
+    template_name = "account/registration/acitvatin_invalid.html"
 
     def get(self, request, *args, **kwargs):
         try:
-            uid = force_str(urlsafe_base64_decode(self.kwargs.get('uidb64')))
+            uid = force_str(urlsafe_base64_decode(self.kwargs.get("uidb64")))
             user = Customer.objects.get(pk=uid)
         except:
             pass
-        token = self.kwargs.get('token')
+        token = self.kwargs.get("token")
         if user is not None and account_activation_token.check_token(user, token):
             user.is_active = True
             user.save()
             login(request, user)
-            return redirect('account:dashboard')
+            return redirect("account:dashboard")
         else:
             return self.render_to_response({})
 
 
 class Dashboard(LoginRequiredMixin, TemplateView):
-    template_name = 'account/dashboard/dashboard.html'
+    template_name = "account/dashboard/dashboard.html"
 
 
 class AllOrders(LoginRequiredMixin, ListView):
-    template_name = 'account/dashboard/all_orders.html'
-    context_object_name = 'orders'
+    template_name = "account/dashboard/all_orders.html"
+    context_object_name = "orders"
 
     def get_queryset(self):
         return user_orders(self.request)
@@ -96,26 +96,26 @@ class AllOrders(LoginRequiredMixin, ListView):
 
 class EditDetails(LoginRequiredMixin, FormView):
     form_class = UserEditForm
-    template_name = 'account/dashboard/edit_details.html'
+    template_name = "account/dashboard/edit_details.html"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        kwargs.update({'instance': self.request.user})
+        kwargs.update({"instance": self.request.user})
         return kwargs
 
     def get(self, request, *args, **kwargs):
         user_form = self.get_form()
-        return self.render_to_response({'user_form': user_form})
+        return self.render_to_response({"user_form": user_form})
 
     def post(self, request, *args, **kwargs):
         user_form = self.get_form()
         if user_form.is_valid():
             user_form.save()
-        return self.render_to_response({'user_form': user_form})
+        return self.render_to_response({"user_form": user_form})
 
 
 class DeleteUser(LoginRequiredMixin, DeletionMixin, View):
-    success_url = reverse_lazy('account:delete_confirmation')
+    success_url = "account:delete_confirmation"
 
     def get_object(self):
         return self.request.user
@@ -126,12 +126,12 @@ class DeleteUser(LoginRequiredMixin, DeletionMixin, View):
         self.object.is_active = False
         self.object.save()
         logout(request)
-        return HttpResponseRedirect(success_url)
+        return redirect(success_url)
 
 
 class ViewAddresses(LoginRequiredMixin, ListView):
-    template_name = 'account/dashboard/addresses.html'
-    context_object_name = 'addresses'
+    template_name = "account/dashboard/addresses.html"
+    context_object_name = "addresses"
 
     def get_queryset(self):
         addresses = Address.objects.filter(customer=self.request.user)
@@ -140,11 +140,11 @@ class ViewAddresses(LoginRequiredMixin, ListView):
 
 class AddAddress(LoginRequiredMixin, FormView):
     form_class = UserAddressForm
-    template_name = 'account/dashboard/edit_addresses.html'
-    
+    template_name = "account/dashboard/edit_addresses.html"
+
     def get(self, request, *args, **kwargs):
         form = self.get_form()
-        return self.render_to_response({'form': form})
+        return self.render_to_response({"form": form})
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
@@ -152,36 +152,36 @@ class AddAddress(LoginRequiredMixin, FormView):
             form = form.save(commit=False)
             form.customer = request.user
             form.save()
-            return redirect('account:addresses')
+            return redirect("account:addresses")
 
 
 class EditAddress(LoginRequiredMixin, FormView):
     form_class = UserAddressForm
-    template_name = 'account/dashboard/edit_addresses.html'
+    template_name = "account/dashboard/edit_addresses.html"
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
-        id = self.kwargs.get('id')
+        id = self.kwargs.get("id")
         instance = get_object_or_404(Address, pk=id, customer=self.request.user)
-        kwargs.update({'instance': instance})
+        kwargs.update({"instance": instance})
         return kwargs
 
     def post(self, request, *args, **kwargs):
         form = self.get_form()
         if form.is_valid():
             form.save()
-            return redirect('account:addresses')
+            return redirect("account:addresses")
 
     def get(self, request, *args, **kwargs):
         form = self.get_form()
-        return self.render_to_response({'form': form})
+        return self.render_to_response({"form": form})
 
 
 class DeleteAddress(LoginRequiredMixin, DeleteView):
-    success_url = reverse_lazy('account:addresses')
+    success_url = reverse_lazy("account:addresses")
 
     def get_object(self):
-        id = self.kwargs.get('id')
+        id = self.kwargs.get("id")
         return get_object_or_404(Address, pk=id, customer=self.request.user)
 
     def get(self, request, *args, **kwargs):
@@ -190,15 +190,17 @@ class DeleteAddress(LoginRequiredMixin, DeleteView):
 
 class SetDefaultAddress(LoginRequiredMixin, View):
     def get(self, request, *args, **kwargs):
-        Address.objects.filter(customer=request.user, default=True).update(default=False)
-        id = self.kwargs.get('id')
+        Address.objects.filter(customer=request.user, default=True).update(
+            default=False
+        )
+        id = self.kwargs.get("id")
         Address.objects.filter(pk=id, customer=request.user).update(default=True)
         return redirect("account:addresses")
 
 
 class UserWishlist(LoginRequiredMixin, ListView):
-    template_name = 'account/dashboard/user_wish_list.html'
-    context_object_name = 'wishlist'
+    template_name = "account/dashboard/user_wish_list.html"
+    context_object_name = "wishlist"
 
     def get_queryset(self):
         customer = Customer.objects.get(id=self.request.user.id)
@@ -207,9 +209,8 @@ class UserWishlist(LoginRequiredMixin, ListView):
 
 
 class AddToWishlist(LoginRequiredMixin, View):
-    
     def get_object(self):
-        id = self.kwargs.get('id')
+        id = self.kwargs.get("id")
         return get_object_or_404(Product, id=id)
 
     def get(self, request, *args, **kwargs):

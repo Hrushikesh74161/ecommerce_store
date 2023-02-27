@@ -7,8 +7,8 @@ from store.models import Product
 
 
 class BasketSummary(ListView):
-    template_name = 'basket/summary.html'
-    context_object_name = 'basket'
+    template_name = "basket/summary.html"
+    context_object_name = "basket"
 
     def get_queryset(self):
         return Basket(self.request)
@@ -17,7 +17,7 @@ class BasketSummary(ListView):
 class BaksetAdd(View):
     def post(self, request, *args, **kwargs):
         basket = Basket(self.request)
-        if self.request.POST.get('action') == 'post':
+        if self.request.POST.get("action") == "post":
             # getting product and product request data
             product_id = int(request.POST.get("productid"))
             product_qty = int(request.POST.get("productqty"))
@@ -40,7 +40,9 @@ class BasketDelete(View):
             basket_subtotal = basket.get_subtotal_price()
             basket_total = basket.get_total_price()
             basket_qty = len(basket)
-            response = JsonResponse({"total": basket_total, "subtotal": basket_subtotal, "qty": basket_qty})
+            response = JsonResponse(
+                {"total": basket_total, "subtotal": basket_subtotal, "qty": basket_qty}
+            )
             return response
 
 
@@ -54,5 +56,7 @@ class BasketUpdate(View):
             basket_subtotal = basket.get_subtotal_price()
             basket_total = basket.get_total_price()
             basket_qty = len(basket)
-            response = JsonResponse({"subtotal": basket_subtotal, "qty": basket_qty, "total": basket_total})
+            response = JsonResponse(
+                {"subtotal": basket_subtotal, "qty": basket_qty, "total": basket_total}
+            )
             return response
