@@ -20,9 +20,14 @@ urlpatterns = [
         auth_views.LogoutView.as_view(next_page="/account/login/"),
         name="logout",
     ),
-    path("register/", views.account_register, name="register"),
+    path("register/", views.AccountRegistration.as_view(), name="register"),
+    # path(
+    #     "acitvate/<slug:uidb64>/<slug:token>/", views.account_activate, name="activate"
+    # ),
     path(
-        "acitvate/<slug:uidb64>/<slug:token>/", views.account_activate, name="activate"
+        "acitvate/<slug:uidb64>/<slug:token>/",
+        views.AccountActivate.as_view(),
+        name="activate",
     ),
     path(
         "password_reset/",
@@ -54,21 +59,33 @@ urlpatterns = [
         name="password_reset_complete",
     ),
     # User dashboard
-    path("dashboard/", views.dashboard, name="dashboard"),
-    path("dashboard/orders/", views.all_orders, name="all_orders"),
-    path("profile/edit/", views.edit_details, name="edit_details"),
-    path("profile/delete_user/", views.delete_user, name="delete_user"),
+    path("dashboard/", views.Dashboard.as_view(), name="dashboard"),
+    path("dashboard/orders/", views.AllOrders.as_view(), name="all_orders"),
+    path("profile/edit/", views.EditDetails.as_view(), name="edit_details"),
+    path("profile/delete_user/", views.DeleteUser.as_view(), name="delete_user"),
     path(
         "profile/delete_confirm",
         TemplateView.as_view(template_name="account/dashboard/delete_confirm.html"),
         name="delete_confirmation",
     ),
-    path('addresses/', views.view_addresses, name='addresses'),
-    path('add_address/', views.add_address, name='add_address'),
-    path('addresses/edit/<slug:id>/', views.edit_address, name='edit_address'),
-    path('addresses/delete/<slug:id>/', views.delete_address, name='delete_address'),
-    path('addresses/set_default/<slug:id>/', views.set_default_address, name='set_default_address'),
+    path("addresses/", views.ViewAddresses.as_view(), name="addresses"),
+    path("add_address/", views.AddAddress.as_view(), name="add_address"),
+    path("addresses/edit/<slug:id>/", views.EditAddress.as_view(), name="edit_address"),
+    path(
+        "addresses/delete/<slug:id>/",
+        views.DeleteAddress.as_view(),
+        name="delete_address",
+    ),
+    path(
+        "addresses/set_default/<slug:id>/",
+        views.SetDefaultAddress.as_view(),
+        name="set_default_address",
+    ),
     # wishlist
-    path('wishlist/', views.user_wishlist, name='wishlist'),
-    path('wishlist/add_to_wishlist/<int:id>', views.add_to_wishlist, name='add_to_wishlist'),
+    path("wishlist/", views.UserWishlist.as_view(), name="wishlist"),
+    path(
+        "wishlist/add_to_wishlist/<int:id>",
+        views.AddToWishlist.as_view(),
+        name="add_to_wishlist",
+    ),
 ]

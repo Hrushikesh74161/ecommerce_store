@@ -5,8 +5,8 @@ from basket import views
 app_name = "basket"
 
 urlpatterns = [
-    path("", views.basket_summary, name="basket_summary"),
-    path("add/", views.basket_add, name="basket_add"),
-    path("delete/", views.basket_delete, name="basket_delete"),
-    path("update/", views.basket_update, name="basket_update"),
+    path("", views.BasketSummary.as_view(), name="basket_summary"),
+    path("add/", views.BaksetAdd.as_view(), name="basket_add"),
+    path("delete/", views.BasketDelete.as_view(), name="basket_delete"),
+    path("update/", views.BasketUpdate.as_view(), name="basket_update"),
 ]

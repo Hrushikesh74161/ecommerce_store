@@ -1,27 +1,42 @@
-from django.contrib import messages
-from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.contrib.auth import logout, login
 from django.contrib.sites.shortcuts import get_current_site
 from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
-from django.urls import reverse
+from django.utils.decorators import method_decorator
+from django.urls import reverse, reverse_lazy
+from django.views.generic import FormView, TemplateView
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView, View, CreateView, DeleteView, UpdateView
+from django.views.generic.edit import DeletionMixin
 
 from account.forms import RegistrationForm, UserEditForm, UserAddressForm
 from account.models import Customer, Address
 from account.token import account_activation_token
 from orders.views import user_orders
 from store.models import Product
+from account.decorators import redirect_if_authenticated
 
 
-def account_register(request: HttpRequest):
-    if request.user.is_authenticated:
-        return redirect("/")
+class AccountRegistration(FormView):
+    form_class = RegistrationForm
 
-    if request.method == "POST":
-        register_form = RegistrationForm(request.POST)
+    @method_decorator(redirect_if_authenticated)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request: HttpRequest, *args, **kwargs):
+        register_form = self.get_form()
+        return render(
+            request, "account/registration/register.html", {"form": register_form}
+        )
+
+    def post(self, request: HttpRequest, *args, **kwargs):
+        register_form = self.get_form()
         if register_form.is_valid():
             user = register_form.save(commit=False)
             user.email = register_form.cleaned_data["email"]
@@ -46,130 +61,163 @@ def account_register(request: HttpRequest):
                 "account/registration/register_email_confirm.html",
                 {"form": register_form},
             )
-    else:
-        register_form = RegistrationForm()
-
-    return render(
-        request, "account/registration/register.html", {"form": register_form}
-    )
 
 
-def account_activate(request, uidb64, token):
-    try:
-        uid = force_str(urlsafe_base64_decode(uidb64))
-        user = Customer.objects.get(pk=uid)
-    except:
-        pass
-    if user is not None and account_activation_token.check_token(user, token):
-        user.is_active = True
-        user.save()
-        login(request, user)
-        return redirect("account:dashboard")
-    else:
-        render(request, "account/registration/activation_invalid.html")
+class AccountActivate(TemplateView):
+    template_name = 'account/registration/acitvatin_invalid.html'
+
+    def get(self, request, *args, **kwargs):
+        try:
+            uid = force_str(urlsafe_base64_decode(self.kwargs.get('uidb64')))
+            user = Customer.objects.get(pk=uid)
+        except:
+            pass
+        token = self.kwargs.get('token')
+        if user is not None and account_activation_token.check_token(user, token):
+            user.is_active = True
+            user.save()
+            login(request, user)
+            return redirect('account:dashboard')
+        else:
+            return self.render_to_response({})
 
 
-@login_required
-def dashboard(request):
-    return render(request, "account/dashboard/dashboard.html")
+class Dashboard(LoginRequiredMixin, TemplateView):
+    template_name = 'account/dashboard/dashboard.html'
 
 
-@login_required
-def all_orders(request):
-    orders = user_orders(request)
-    return render(request, "account/dashboard/all_orders.html", {"orders": orders})
+class AllOrders(LoginRequiredMixin, ListView):
+    template_name = 'account/dashboard/all_orders.html'
+    context_object_name = 'orders'
+
+    def get_queryset(self):
+        return user_orders(self.request)
 
 
-@login_required
-def edit_details(request: HttpRequest):
-    if request.method == "POST":
-        user_form = UserEditForm(instance=request.user, data=request.POST)
+class EditDetails(LoginRequiredMixin, FormView):
+    form_class = UserEditForm
+    template_name = 'account/dashboard/edit_details.html'
 
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs.update({'instance': self.request.user})
+        return kwargs
+
+    def get(self, request, *args, **kwargs):
+        user_form = self.get_form()
+        return self.render_to_response({'user_form': user_form})
+
+    def post(self, request, *args, **kwargs):
+        user_form = self.get_form()
         if user_form.is_valid():
             user_form.save()
-    else:
-        user_form = UserEditForm(instance=request.user)
-
-    return render(
-        request, "account/dashboard/edit_details.html", {"user_form": user_form}
-    )
+        return self.render_to_response({'user_form': user_form})
 
 
-@login_required
-def delete_user(request: HttpRequest):
-    user = Customer.objects.get(user_name=request.user)
-    user.is_active = False
-    user.save()
-    logout(request)
-    return redirect("account:delete_confirmation")
+class DeleteUser(LoginRequiredMixin, DeletionMixin, View):
+    success_url = reverse_lazy('account:delete_confirmation')
+
+    def get_object(self):
+        return self.request.user
+
+    def delete(self, request: HttpRequest, *args: str, **kwargs):
+        self.object = self.get_object()
+        success_url = self.get_success_url()
+        self.object.is_active = False
+        self.object.save()
+        logout(request)
+        return HttpResponseRedirect(success_url)
 
 
-@login_required
-def view_addresses(request: HttpRequest):
-    addresses = Address.objects.filter(customer=request.user)
-    return render(request, "account/dashboard/addresses.html", {"addresses": addresses})
+class ViewAddresses(LoginRequiredMixin, ListView):
+    template_name = 'account/dashboard/addresses.html'
+    context_object_name = 'addresses'
+
+    def get_queryset(self):
+        addresses = Address.objects.filter(customer=self.request.user)
+        return addresses
 
 
-@login_required
-def add_address(request: HttpRequest):
-    if request.method == "POST":
-        address_form = UserAddressForm(data=request.POST)
-        if address_form.is_valid():
-            address_form = address_form.save(commit=False)
-            address_form.customer = request.user
-            address_form.save()
-            return HttpResponseRedirect(reverse("account:addresses"))
-    else:
-        address_form = UserAddressForm()
-    return render(
-        request, "account/dashboard/edit_addresses.html", {"form": address_form}
-    )
+class AddAddress(LoginRequiredMixin, FormView):
+    form_class = UserAddressForm
+    template_name = 'account/dashboard/edit_addresses.html'
+    
+    def get(self, request, *args, **kwargs):
+        form = self.get_form()
+        return self.render_to_response({'form': form})
+
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            form = form.save(commit=False)
+            form.customer = request.user
+            form.save()
+            return redirect('account:addresses')
 
 
-@login_required
-def edit_address(request: HttpRequest, id):
-    address = get_object_or_404(Address, pk=id, customer=request.user)
-    if request.method == "POST":
-        address_form = UserAddressForm(instance=address, data=request.POST)
-        if address_form.is_valid():
-            address_form.save()
-            return HttpResponseRedirect(reverse("account:addresses"))
-    else:
-        address_form = UserAddressForm(instance=address)
+class EditAddress(LoginRequiredMixin, FormView):
+    form_class = UserAddressForm
+    template_name = 'account/dashboard/edit_addresses.html'
 
-    return render(
-        request, "account/dashboard/edit_addresses.html", {"form": address_form}
-    )
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        id = self.kwargs.get('id')
+        instance = get_object_or_404(Address, pk=id, customer=self.request.user)
+        kwargs.update({'instance': instance})
+        return kwargs
 
+    def post(self, request, *args, **kwargs):
+        form = self.get_form()
+        if form.is_valid():
+            form.save()
+            return redirect('account:addresses')
 
-@login_required
-def delete_address(request: HttpRequest, id):
-    address = get_object_or_404(Address, pk=id, customer=request.user)
-    address.delete()
-    return redirect("account:addresses")
-
-
-@login_required
-def set_default_address(request: HttpRequest, id):
-    Address.objects.filter(customer=request.user, default=True).update(default=False)
-    Address.objects.filter(pk=id, customer=request.user).update(default=True)
-    return redirect("account:addresses")
+    def get(self, request, *args, **kwargs):
+        form = self.get_form()
+        return self.render_to_response({'form': form})
 
 
-@login_required
-def user_wishlist(request: HttpRequest):
-    customer = Customer.objects.get(id=request.user.id)
-    wishlist = customer.wishlist.all()
-    return render(request, 'account/dashboard/user_wish_list.html', {'wishlist': wishlist})
+class DeleteAddress(LoginRequiredMixin, DeleteView):
+    success_url = reverse_lazy('account:addresses')
+
+    def get_object(self):
+        id = self.kwargs.get('id')
+        return get_object_or_404(Address, pk=id, customer=self.request.user)
+
+    def get(self, request, *args, **kwargs):
+        return self.delete(request, *args, **kwargs)
 
 
-@login_required
-def add_to_wishlist(request: HttpRequest, id):
-    product = get_object_or_404(Product, id=id)
-    if product.users_wishlist.filter(id=request.user.id).exists():
-        product.users_wishlist.remove(request.user)
-        messages.success(request, message=f'{product} removed from your wishlist.')
-    else:
-        product.users_wishlist.add(request.user)
-        messages.success(request, message=f'{product} added to your wishlist.')
-    return HttpResponseRedirect(request.META['HTTP_REFERER'])
+class SetDefaultAddress(LoginRequiredMixin, View):
+    def get(self, request, *args, **kwargs):
+        Address.objects.filter(customer=request.user, default=True).update(default=False)
+        id = self.kwargs.get('id')
+        Address.objects.filter(pk=id, customer=request.user).update(default=True)
+        return redirect("account:addresses")
+
+
+class UserWishlist(LoginRequiredMixin, ListView):
+    template_name = 'account/dashboard/user_wish_list.html'
+    context_object_name = 'wishlist'
+
+    def get_queryset(self):
+        customer = Customer.objects.get(id=self.request.user.id)
+        wishlist = customer.wishlist.all()
+        return wishlist
+
+
+class AddToWishlist(LoginRequiredMixin, View):
+    
+    def get_object(self):
+        id = self.kwargs.get('id')
+        return get_object_or_404(Product, id=id)
+
+    def get(self, request, *args, **kwargs):
+        product = self.get_object()
+        if product.users_wishlist.filter(id=request.user.id).exists():
+            product.users_wishlist.remove(request.user)
+            messages.success(request, message=f"{product} removed from your wishlist.")
+        else:
+            product.users_wishlist.add(request.user)
+            messages.success(request, message=f"{product} added to your wishlist.")
+        return HttpResponseRedirect(request.META["HTTP_REFERER"])

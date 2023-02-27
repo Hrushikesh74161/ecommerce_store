@@ -3,3 +3,4 @@ venv/
 .django_env
 .postgres_env
 __pycache__/
+media/images/*.*
