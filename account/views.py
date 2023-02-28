@@ -1,4 +1,3 @@
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import logout, login
 from django.contrib.sites.shortcuts import get_current_site
@@ -9,9 +8,15 @@ from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
 from django.utils.decorators import method_decorator
 from django.urls import reverse, reverse_lazy
-from django.views.generic import FormView, TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView, View, CreateView, DeleteView, UpdateView
+from django.views.generic import (
+    ListView,
+    View,
+    DeleteView,
+    TemplateView,
+    FormView,
+    RedirectView,
+)
 from django.views.generic.edit import DeletionMixin
 
 from account.forms import RegistrationForm, UserEditForm, UserAddressForm
@@ -24,16 +29,11 @@ from account.decorators import redirect_if_authenticated
 
 class AccountRegistration(FormView):
     form_class = RegistrationForm
+    template_name = "account/registration/register.html"
 
     @method_decorator(redirect_if_authenticated)
     def dispatch(self, request, *args, **kwargs):
         return super().dispatch(request, *args, **kwargs)
-
-    def get(self, request: HttpRequest, *args, **kwargs):
-        register_form = self.get_form()
-        return render(
-            request, "account/registration/register.html", {"form": register_form}
-        )
 
     def post(self, request: HttpRequest, *args, **kwargs):
         register_form = self.get_form()
@@ -61,6 +61,8 @@ class AccountRegistration(FormView):
                 "account/registration/register_email_confirm.html",
                 {"form": register_form},
             )
+        else:
+            self.form_invalid(register_form)
 
 
 class AccountActivate(TemplateView):
@@ -97,21 +99,16 @@ class AllOrders(LoginRequiredMixin, ListView):
 class EditDetails(LoginRequiredMixin, FormView):
     form_class = UserEditForm
     template_name = "account/dashboard/edit_details.html"
+    success_url = reverse_lazy("account:edit_details")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         kwargs.update({"instance": self.request.user})
         return kwargs
 
-    def get(self, request, *args, **kwargs):
-        user_form = self.get_form()
-        return self.render_to_response({"user_form": user_form})
-
-    def post(self, request, *args, **kwargs):
-        user_form = self.get_form()
-        if user_form.is_valid():
-            user_form.save()
-        return self.render_to_response({"user_form": user_form})
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form=form)
 
 
 class DeleteUser(LoginRequiredMixin, DeletionMixin, View):
@@ -141,23 +138,19 @@ class ViewAddresses(LoginRequiredMixin, ListView):
 class AddAddress(LoginRequiredMixin, FormView):
     form_class = UserAddressForm
     template_name = "account/dashboard/edit_addresses.html"
+    success_url = reverse_lazy("account:addresses")
 
-    def get(self, request, *args, **kwargs):
-        form = self.get_form()
-        return self.render_to_response({"form": form})
-
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        if form.is_valid():
-            form = form.save(commit=False)
-            form.customer = request.user
-            form.save()
-            return redirect("account:addresses")
+    def form_valid(self, form):
+        form = form.save(commit=False)
+        form.customer = self.request.user
+        form.save()
+        return super().form_valid(form=form)
 
 
 class EditAddress(LoginRequiredMixin, FormView):
     form_class = UserAddressForm
     template_name = "account/dashboard/edit_addresses.html"
+    success_url = reverse_lazy("account:addresses")
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -166,15 +159,9 @@ class EditAddress(LoginRequiredMixin, FormView):
         kwargs.update({"instance": instance})
         return kwargs
 
-    def post(self, request, *args, **kwargs):
-        form = self.get_form()
-        if form.is_valid():
-            form.save()
-            return redirect("account:addresses")
-
-    def get(self, request, *args, **kwargs):
-        form = self.get_form()
-        return self.render_to_response({"form": form})
+    def form_valid(self, form):
+        form.save()
+        return super().form_valid(form=form)
 
 
 class DeleteAddress(LoginRequiredMixin, DeleteView):
@@ -184,6 +171,7 @@ class DeleteAddress(LoginRequiredMixin, DeleteView):
         id = self.kwargs.get("id")
         return get_object_or_404(Address, pk=id, customer=self.request.user)
 
+    # only post method is defined in DeleteView
     def get(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)
 

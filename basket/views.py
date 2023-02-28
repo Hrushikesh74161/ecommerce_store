@@ -1,17 +1,17 @@
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404, render
-from django.views.generic import ListView, View
+from django.views.generic import ListView, View, TemplateView
 
 from basket.basket import Basket
 from store.models import Product
 
 
-class BasketSummary(ListView):
+class BasketSummary(TemplateView):
+    # Instead of using ListView with custom get_queryset method
+    # which returns Basket(self.request)
+    # we are using TemplateView, and basket object required for
+    # template is provided by our custom context processor
     template_name = "basket/summary.html"
-    context_object_name = "basket"
-
-    def get_queryset(self):
-        return Basket(self.request)
 
 
 class BaksetAdd(View):
