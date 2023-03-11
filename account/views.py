@@ -1,7 +1,7 @@
 from django.contrib import messages
 from django.contrib.auth import logout, login
 from django.contrib.sites.shortcuts import get_current_site
-from django.http import HttpRequest, HttpResponse, HttpResponseRedirect
+from django.http import HttpRequest, HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template.loader import render_to_string
 from django.utils.encoding import force_bytes, force_str
@@ -15,7 +15,6 @@ from django.views.generic import (
     DeleteView,
     TemplateView,
     FormView,
-    RedirectView,
 )
 from django.views.generic.edit import DeletionMixin
 
