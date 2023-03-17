@@ -1,8 +1,5 @@
-from functools import lru_cache
-
 from django.shortcuts import get_object_or_404
 from django.views.generic import ListView, DetailView
-from django.contrib import messages
 
 from store.models import Category, Product
 
@@ -12,7 +9,11 @@ class AllProducts(ListView):
     template_name = "store/index.html"
 
     def get_queryset(self):
-        return Product.objects.prefetch_related("product_images").filter(is_active=True)
+        return (
+            Product.objects.prefetch_related("product_images")
+            .filter(is_active=True)
+            .only("title", "regular_price")
+        )
 
 
 class ProductDetail(DetailView):

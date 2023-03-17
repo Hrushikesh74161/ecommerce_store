@@ -1,4 +1,4 @@
-/db/
+/data/
 venv/
 .django_env
 .postgres_env
