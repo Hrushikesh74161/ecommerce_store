@@ -34,7 +34,8 @@ class Migration(migrations.Migration):
                 ("post_code", models.CharField(max_length=20)),
                 ("created", models.DateTimeField(auto_now_add=True)),
                 ("updated", models.DateTimeField(auto_now=True)),
-                ("total_paid", models.DecimalField(decimal_places=2, max_digits=5)),
+                ("total_paid", models.DecimalField(
+                    decimal_places=2, max_digits=5)),
                 ("order_key", models.CharField(max_length=200)),
                 ("billing_status", models.BooleanField(default=False)),
                 (

@@ -11,6 +11,7 @@ from store.models import (
     ProductType,
 )
 
+
 @admin.register(Category)
 class CategoryAdmin(MPTTModelAdmin):
     prepopulated_fields = {

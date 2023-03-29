@@ -38,7 +38,8 @@ urlpatterns = [
     ),
     path(
         "password_reset/password_reset_email_confirm/",
-        TemplateView.as_view(template_name="account/password_reset/reset_status.html"),
+        TemplateView.as_view(
+            template_name="account/password_reset/reset_status.html"),
         name="password_reset_email_confirm",
     ),
     path(
@@ -52,22 +53,29 @@ urlpatterns = [
     ),
     path(
         "password_reset_complete/",
-        TemplateView.as_view(template_name="account/password_reset/reset_status.html"),
+        TemplateView.as_view(
+            template_name="account/password_reset/reset_status.html"),
         name="password_reset_complete",
     ),
     # User dashboard
     path("dashboard/", views.Dashboard.as_view(), name="dashboard"),
     path("dashboard/orders/", views.AllOrders.as_view(), name="all_orders"),
     path("profile/edit/", views.EditDetails.as_view(), name="edit_details"),
-    path("profile/delete_user/", views.DeleteUser.as_view(), name="delete_user"),
+    path(
+        "profile/delete_user/",
+        views.DeleteUser.as_view(),
+        name="delete_user"
+    ),
     path(
         "profile/delete_confirm",
-        TemplateView.as_view(template_name="account/dashboard/delete_confirm.html"),
+        TemplateView.as_view(
+            template_name="account/dashboard/delete_confirm.html"),
         name="delete_confirmation",
     ),
     path("addresses/", views.ViewAddresses.as_view(), name="addresses"),
     path("add_address/", views.AddAddress.as_view(), name="add_address"),
-    path("addresses/edit/<slug:id>/", views.EditAddress.as_view(), name="edit_address"),
+    path("addresses/edit/<slug:id>/",
+         views.EditAddress.as_view(), name="edit_address"),
     path(
         "addresses/delete/<slug:id>/",
         views.DeleteAddress.as_view(),

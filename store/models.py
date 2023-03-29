@@ -43,7 +43,7 @@ class Category(MPTTModel):
 
     def get_absolute_url(self):
         return reverse('store:category_list', args=[self.slug])
-    
+
     def __str__(self):
         return self.name
 
@@ -71,7 +71,7 @@ class ProductType(models.Model):
     def __str__(self):
         return self.name
 
-    
+
 class ProductSpecification(models.Model):
 
     """
@@ -215,7 +215,7 @@ class ProductSpecificationValue(models.Model):
     def __str__(self):
         return self.value
 
-    
+
 class ProductImage(models.Model):
     """
     Product Images Table.
@@ -253,4 +253,3 @@ class ProductImage(models.Model):
     class Meta:
         verbose_name = _('Product Image')
         verbose_name_plural = _('Product Images')
-    

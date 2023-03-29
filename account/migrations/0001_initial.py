@@ -26,7 +26,8 @@ class Migration(migrations.Migration):
                         verbose_name="ID",
                     ),
                 ),
-                ("password", models.CharField(max_length=128, verbose_name="password")),
+                ("password", models.CharField(
+                    max_length=128, verbose_name="password")),
                 (
                     "last_login",
                     models.DateTimeField(
@@ -98,18 +99,22 @@ class Migration(migrations.Migration):
                     models.CharField(max_length=150, verbose_name="Full Name"),
                 ),
                 ("phone", models.CharField(max_length=50, verbose_name="Phone Number")),
-                ("postcode", models.CharField(max_length=50, verbose_name="Postcode")),
+                ("postcode", models.CharField(
+                    max_length=50, verbose_name="Postcode")),
                 (
                     "address_line1",
-                    models.CharField(max_length=255, verbose_name="Address Line 1"),
+                    models.CharField(
+                        max_length=255, verbose_name="Address Line 1"),
                 ),
                 (
                     "address_line2",
-                    models.CharField(max_length=255, verbose_name="Address Line 2"),
+                    models.CharField(
+                        max_length=255, verbose_name="Address Line 2"),
                 ),
                 (
                     "town_city",
-                    models.CharField(max_length=150, verbose_name="Town/City/State"),
+                    models.CharField(
+                        max_length=150, verbose_name="Town/City/State"),
                 ),
                 (
                     "delivery_instructions",
@@ -119,13 +124,16 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "created_at",
-                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Created at"),
                 ),
                 (
                     "updated_at",
-                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="Updated at"),
                 ),
-                ("default", models.BooleanField(default=False, verbose_name="Default")),
+                ("default", models.BooleanField(
+                    default=False, verbose_name="Default")),
                 (
                     "customer",
                     models.ForeignKey(

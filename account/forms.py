@@ -83,7 +83,8 @@ class RegistrationForm(forms.ModelForm):
 
     password = forms.CharField(label="Password", widget=forms.PasswordInput)
 
-    password2 = forms.CharField(label="Repeat password", widget=forms.PasswordInput)
+    password2 = forms.CharField(
+        label="Repeat password", widget=forms.PasswordInput)
 
     class Meta:
         model = get_user_model()
@@ -108,7 +109,8 @@ class RegistrationForm(forms.ModelForm):
     def clean_email(self):
         email = self.cleaned_data["email"]
         if Customer.objects.filter(email=email).exists():
-            raise forms.ValidationError("Account already exists with that email.")
+            raise forms.ValidationError(
+                "Account already exists with that email.")
         return email
 
     def __init__(self, *args, **kwargs):
@@ -116,9 +118,11 @@ class RegistrationForm(forms.ModelForm):
         self.fields["name"].widget.attrs.update(
             {"class": "form-control mb-3", "placeholder": "name"}
         )
-        self.fields["email"].widget.attrs.update(
-            {"class": "form-control mb-3", "placeholder": "email", "name": "email"}
-        )
+        self.fields["email"].widget.attrs.update({
+            "class": "form-control mb-3",
+            "placeholder": "email",
+            "name": "email"
+        })
         self.fields["password"].widget.attrs.update(
             {"class": "form-control mb-3", "placeholder": "Password"}
         )
@@ -204,7 +208,8 @@ class PwdResetForm(PasswordResetForm):
         email = self.cleaned_data["email"]
         user = Customer.objects.get(email=email)
         if not user:
-            raise forms.ValidationError("No account registered with that email.")
+            raise forms.ValidationError(
+                "No account registered with that email.")
         return email
 
 

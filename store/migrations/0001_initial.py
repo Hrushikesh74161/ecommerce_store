@@ -41,7 +41,8 @@ class Migration(migrations.Migration):
                 ("is_active", models.BooleanField(default=True)),
                 ("lft", models.PositiveIntegerField(editable=False)),
                 ("rght", models.PositiveIntegerField(editable=False)),
-                ("tree_id", models.PositiveIntegerField(db_index=True, editable=False)),
+                ("tree_id", models.PositiveIntegerField(
+                    db_index=True, editable=False)),
                 ("level", models.PositiveIntegerField(editable=False)),
                 (
                     "parent",
@@ -122,11 +123,13 @@ class Migration(migrations.Migration):
                 ),
                 (
                     "created_at",
-                    models.DateTimeField(auto_now_add=True, verbose_name="Created at"),
+                    models.DateTimeField(
+                        auto_now_add=True, verbose_name="Created at"),
                 ),
                 (
                     "updated_at",
-                    models.DateTimeField(auto_now=True, verbose_name="Updated at"),
+                    models.DateTimeField(
+                        auto_now=True, verbose_name="Updated at"),
                 ),
                 (
                     "category",

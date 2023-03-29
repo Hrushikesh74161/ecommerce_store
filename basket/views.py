@@ -40,9 +40,11 @@ class BasketDelete(View):
             basket_subtotal = basket.get_subtotal_price()
             basket_total = basket.get_total_price()
             basket_qty = len(basket)
-            response = JsonResponse(
-                {"total": basket_total, "subtotal": basket_subtotal, "qty": basket_qty}
-            )
+            response = JsonResponse({
+                "total": basket_total,
+                "subtotal": basket_subtotal,
+                "qty": basket_qty
+            })
             return response
 
 
@@ -56,7 +58,9 @@ class BasketUpdate(View):
             basket_subtotal = basket.get_subtotal_price()
             basket_total = basket.get_total_price()
             basket_qty = len(basket)
-            response = JsonResponse(
-                {"subtotal": basket_subtotal, "qty": basket_qty, "total": basket_total}
-            )
+            response = JsonResponse({
+                "subtotal": basket_subtotal,
+                "qty": basket_qty,
+                "total": basket_total
+            })
             return response

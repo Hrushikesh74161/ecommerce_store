@@ -34,7 +34,8 @@ class Basket:
         if product_id in self.basket:
             self.basket[product_id]["qty"] = qty
         else:
-            self.basket[product_id] = {"price": str(product.regular_price), "qty": int(qty)}
+            self.basket[product_id] = {"price": str(
+                product.regular_price), "qty": int(qty)}
 
         # saving the session data
         self.save()
@@ -76,7 +77,9 @@ class Basket:
         and return products
         """
         product_ids = self.basket.keys()
-        products = Product.objects.filter(id__in=product_ids, is_active=True).prefetch_related('product_images')
+        products = Product.objects.filter(
+            id__in=product_ids,
+            is_active=True).prefetch_related('product_images')
         basket = self.basket.copy()
 
         for product in products:
@@ -94,8 +97,9 @@ class Basket:
         return sum(item["qty"] for item in self.basket.values())
 
     def get_subtotal_price(self):
+        # i - item
         subtotal = sum(
-            Decimal(item["price"]) * item["qty"] for item in self.basket.values()
+            Decimal(i["price"]) * i["qty"] for i in self.basket.values()
         )
 
         return subtotal

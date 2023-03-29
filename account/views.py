@@ -154,7 +154,8 @@ class EditAddress(LoginRequiredMixin, FormView):
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
         id = self.kwargs.get("id")
-        instance = get_object_or_404(Address, pk=id, customer=self.request.user)
+        instance = get_object_or_404(
+            Address, pk=id, customer=self.request.user)
         kwargs.update({"instance": instance})
         return kwargs
 
@@ -181,7 +182,8 @@ class SetDefaultAddress(LoginRequiredMixin, View):
             default=False
         )
         id = self.kwargs.get("id")
-        Address.objects.filter(pk=id, customer=request.user).update(default=True)
+        Address.objects.filter(
+            pk=id, customer=request.user).update(default=True)
         return redirect("account:addresses")
 
 
@@ -204,8 +206,10 @@ class AddToWishlist(LoginRequiredMixin, View):
         product = self.get_object()
         if product.users_wishlist.filter(id=request.user.id).exists():
             product.users_wishlist.remove(request.user)
-            messages.success(request, message=f"{product} removed from your wishlist.")
+            messages.success(
+                request, message=f"{product} removed from your wishlist.")
         else:
             product.users_wishlist.add(request.user)
-            messages.success(request, message=f"{product} added to your wishlist.")
+            messages.success(
+                request, message=f"{product} added to your wishlist.")
         return HttpResponseRedirect(request.META["HTTP_REFERER"])
